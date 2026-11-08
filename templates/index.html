@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DynamoPanel | Consultas</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="DynamoPanel inicio">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span>Dynamo<span class="brand-light">Panel</span></span>
+      </a>
+      <div class="status"><span class="status-dot"></span><span id="connection-label">Panel de consultas</span></div>
+    </header>
+
+    <section class="intro">
+      <div class="eyebrow">TIENDA DIGITAL DYNAMO</div>
+      <h1 id="hero-title">Ventas por ciudad</h1>
+      <p id="hero-subtitle">Resumen de ventas agrupadas por ciudad del cliente.</p>
+
+      <nav class="query-grid" aria-label="Consultas principales">
+      <button class="query-card card-indigo active" data-query="ventas">
+        <span class="card-icon">🌆</span><strong>Reto 3 · Ventas por ciudad</strong>
+      </button>
+      <button class="query-card card-mint" data-query="ingresos">
+        <span class="card-icon">💰</span><strong>Reto 4 · Ingresos por categoría</strong>
+      </button>
+      <button class="query-card card-peach" data-query="clientes">
+        <span class="card-icon">📦</span><strong>Reto 5 · Clientes por categoría</strong>
+      </button>
+      </nav>
+      <nav class="tool-shortcuts" aria-label="Acciones de clientes y archivos">
+        <a href="#buscar-cliente">🔎 Buscar cliente por ID</a>
+        <a href="#nuevo-cliente">＋ Nuevo cliente</a>
+        <a href="#subir-archivo">📤 Subir archivo</a>
+      </nav>
+    </section>
+
+    <section class="workspace">
+      <div class="workspace-head">
+        <div><div class="section-kicker">RESULTADOS</div><h2 id="results-title">Ventas por ciudad</h2><p id="results-subtitle">Resumen de ventas agrupadas por ciudad del cliente.</p></div>
+        <button id="refresh-button" class="ghost-button"><span>↻</span> Actualizar</button>
+      </div>
+      <form id="reto-search-form" class="reto-search">
+        <div class="reto-search-heading">
+          <strong>Filtrar por cliente</strong>
+          <span>Los campos completados se combinan; puedes buscar por coincidencia parcial.</span>
+        </div>
+        <label>ID del cliente<input name="clienteId" placeholder="Ej. C001"></label>
+        <label>Nombre<input name="nombre" placeholder="Ej. Ana"></label>
+        <label>Ciudad<input name="ciudad" placeholder="Ej. Bogotá"></label>
+        <label>Correo<input name="correo" type="text" inputmode="email" placeholder="Ej. correo.com"></label>
+        <div class="reto-search-actions">
+          <button type="submit">Buscar</button>
+          <button id="clear-reto-search" class="ghost-button" type="reset">Limpiar</button>
+        </div>
+      </form>
+      <div id="summary-row" class="summary-row"></div>
+      <div id="results-area" class="results-area">
+        <div class="loading"><span class="spinner"></span> Preparando consulta...</div>
+      </div>
+      <div id="error-area" class="error-area" hidden></div>
+    </section>
+
+    <section class="tools-grid">
+      <article class="tool-card" id="buscar-cliente">
+        <div class="tool-icon search-icon">⌕</div>
+        <div class="tool-content"><h3>Buscar cliente</h3><p>Consulta un cliente por su identificador.</p>
+          <form id="search-form" class="inline-form"><input id="client-id" placeholder="Ej. C002" aria-label="ID del cliente" required><button type="submit">Buscar</button></form>
+          <div id="client-result" class="mini-result" hidden></div>
+        </div>
+      </article>
+      <article class="tool-card" id="nuevo-cliente">
+        <div class="tool-icon add-icon">＋</div>
+        <div class="tool-content"><h3>Nuevo cliente</h3><p>Escribe un ID o déjalo vacío para generar uno aleatorio (C + 6 números).</p>
+          <form id="new-client-form" class="form-grid">
+            <input name="clienteId" placeholder="ID del cliente (opcional), ej. C000123" aria-label="ID del cliente, opcional">
+            <input name="nombre" placeholder="Nombre completo" required>
+            <input name="ciudad" placeholder="Ciudad" required>
+            <input name="correo" type="email" placeholder="Correo electrónico" required>
+            <button type="submit">Guardar cliente</button>
+          </form>
+          <div id="new-client-result" class="mini-result" hidden></div>
+        </div>
+      </article>
+      <article class="tool-card upload-card" id="subir-archivo">
+        <div class="tool-icon upload-icon">↑</div>
+        <div class="tool-content"><h3>Importar datos</h3><p>Inserta archivos JSON de clientes, productos o ventas en DynamoDB. Los IDs existentes no se sobrescriben.</p>
+          <form id="upload-form" class="inline-form"><input id="json-file" name="archivos" type="file" accept=".json,application/json" multiple required><button type="submit">Importar</button></form>
+          <div id="upload-result" class="mini-result" hidden></div>
+        </div>
+      </article>
+    </section>
+    <footer><span class="footer-mark">D</span><span>DynamoPanel</span><span class="footer-separator">/</span><span>Flask + Amazon DynamoDB</span><span class="footer-spacer"></span><span id="footer-region">Región AWS configurable</span></footer>
+  </main>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
