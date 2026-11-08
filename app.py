@@ -3,12 +3,15 @@ import json
 import re
 import secrets
 from decimal import Decimal
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, session
 import boto3
 from boto3.dynamodb.types import TypeDeserializer
 from botocore.exceptions import ClientError
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY") or secrets.token_hex(32)
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 TABLES = {
@@ -27,6 +30,20 @@ DYNAMODB_KEYS = {
     "ventas": "ventaId",
 }
 DYNAMODB_DESERIALIZER = TypeDeserializer()
+
+@app.before_request
+def protect_state_changing_requests():
+    if request.method != "POST":
+        return None
+    csrf_token = session.get("csrf_token")
+    request_token = request.headers.get("X-CSRFToken", "")
+    if not csrf_token or not secrets.compare_digest(request_token, csrf_token):
+        return jsonify({"error": "La solicitud no superó la validación CSRF."}), 403
+    return None
+
+@app.context_processor
+def inject_csrf_token():
+    return {"csrf_token": session.setdefault("csrf_token", secrets.token_urlsafe(32))}
 
 def dynamodb_error_response(operation, error):
     details = error.response.get("Error", {})
@@ -309,4 +326,4 @@ def not_found(_):
     return jsonify({"error": "Ruta no encontrada."}), 404
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "80")), debug=False)
+    app.run(host=os.getenv("HOST", "127.0.0.1"), port=int(os.getenv("PORT", "80")), debug=False)

@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
   <title>DynamoPanel | Consultas</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
@@ -50,10 +51,10 @@
           <strong>Filtrar por cliente</strong>
           <span>Los campos completados se combinan; puedes buscar por coincidencia parcial.</span>
         </div>
-        <label>ID del cliente<input name="clienteId" placeholder="Ej. C001"></label>
-        <label>Nombre<input name="nombre" placeholder="Ej. Ana"></label>
-        <label>Ciudad<input name="ciudad" placeholder="Ej. Bogotá"></label>
-        <label>Correo<input name="correo" type="text" inputmode="email" placeholder="Ej. correo.com"></label>
+        <label for="filter-client-id">ID del cliente</label><input id="filter-client-id" name="clienteId" placeholder="Ej. C001">
+        <label for="filter-name">Nombre</label><input id="filter-name" name="nombre" placeholder="Ej. Ana">
+        <label for="filter-city">Ciudad</label><input id="filter-city" name="ciudad" placeholder="Ej. Bogotá">
+        <label for="filter-email">Correo</label><input id="filter-email" name="correo" type="text" inputmode="email" placeholder="Ej. correo.com">
         <div class="reto-search-actions">
           <button type="submit">Buscar</button>
           <button id="clear-reto-search" class="ghost-button" type="reset">Limpiar</button>
@@ -70,7 +71,7 @@
       <article class="tool-card" id="buscar-cliente">
         <div class="tool-icon search-icon">⌕</div>
         <div class="tool-content"><h3>Buscar cliente</h3><p>Consulta un cliente por su identificador.</p>
-          <form id="search-form" class="inline-form"><input id="client-id" placeholder="Ej. C002" aria-label="ID del cliente" required><button type="submit">Buscar</button></form>
+          <form id="search-form" class="inline-form"><label class="sr-only" for="client-id">ID del cliente</label><input id="client-id" placeholder="Ej. C002" required><button type="submit">Buscar</button></form>
           <div id="client-result" class="mini-result" hidden></div>
         </div>
       </article>
@@ -78,10 +79,10 @@
         <div class="tool-icon add-icon">＋</div>
         <div class="tool-content"><h3>Nuevo cliente</h3><p>Escribe un ID o déjalo vacío para generar uno aleatorio (C + 6 números).</p>
           <form id="new-client-form" class="form-grid">
-            <input name="clienteId" placeholder="ID del cliente (opcional), ej. C000123" aria-label="ID del cliente, opcional">
-            <input name="nombre" placeholder="Nombre completo" required>
-            <input name="ciudad" placeholder="Ciudad" required>
-            <input name="correo" type="email" placeholder="Correo electrónico" required>
+            <label class="sr-only" for="new-client-id">ID del cliente, opcional</label><input id="new-client-id" name="clienteId" placeholder="ID del cliente (opcional), ej. C000123">
+            <label class="sr-only" for="new-client-name">Nombre completo</label><input id="new-client-name" name="nombre" placeholder="Nombre completo" required>
+            <label class="sr-only" for="new-client-city">Ciudad</label><input id="new-client-city" name="ciudad" placeholder="Ciudad" required>
+            <label class="sr-only" for="new-client-email">Correo electrónico</label><input id="new-client-email" name="correo" type="email" placeholder="Correo electrónico" required>
             <button type="submit">Guardar cliente</button>
           </form>
           <div id="new-client-result" class="mini-result" hidden></div>
@@ -90,7 +91,7 @@
       <article class="tool-card upload-card" id="subir-archivo">
         <div class="tool-icon upload-icon">↑</div>
         <div class="tool-content"><h3>Importar datos</h3><p>Inserta archivos JSON de clientes, productos o ventas en DynamoDB. Los IDs existentes no se sobrescriben.</p>
-          <form id="upload-form" class="inline-form"><input id="json-file" name="archivos" type="file" accept=".json,application/json" multiple required><button type="submit">Importar</button></form>
+          <form id="upload-form" class="inline-form"><label class="sr-only" for="json-file">Archivos JSON</label><input id="json-file" name="archivos" type="file" accept=".json,application/json" multiple required><button type="submit">Importar</button></form>
           <div id="upload-result" class="mini-result" hidden></div>
         </div>
       </article>

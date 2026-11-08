@@ -1,4 +1,5 @@
 const $ = (id) => document.getElementById(id);
+const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 let currentQuery = "ventas";
 const money = (n) => new Intl.NumberFormat("es-CO", {style:"currency", currency:"COP", maximumFractionDigits:0}).format(Number(n || 0));
 const number = (n) => new Intl.NumberFormat("es-CO").format(Number(n || 0));
@@ -11,7 +12,10 @@ function table(headers, rows) {
   return `<div class="table-wrap"><table><thead><tr>${headers.map(h=>`<th class="${h.right?'numeric':''}">${safe(h.label)}</th>`).join("")}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map((cell,i)=>`<td class="${headers[i]?.right?'numeric':''}">${cell}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 async function getJSON(url, options={}) {
-  const response = await fetch(url, options);
+  const response = await fetch(url, {
+    ...options,
+    headers: {...(options.headers || {}), "X-CSRFToken": csrfToken}
+  });
   const data = await response.json().catch(()=>({error:"El servidor devolvió una respuesta no válida."}));
   if (!response.ok) throw new Error(data.error || `Error HTTP ${response.status}`);
   return data;
@@ -59,13 +63,22 @@ async function loadQuery(query=currentQuery) {
     showError(e.message);
   }
 }
-document.querySelectorAll(".query-card").forEach(b=>b.addEventListener("click",()=>loadQuery(b.dataset.query)));
-$("refresh-button").addEventListener("click",()=>loadQuery());
-$("reto-search-form").addEventListener("submit",e=>{e.preventDefault();loadQuery();});
-$("reto-search-form").addEventListener("reset",()=>setTimeout(()=>loadQuery(),0));
+document.querySelectorAll(".query-card").forEach(b=>b.addEventListener("click",()=>void loadQuery(b.dataset.query)));
+$("refresh-button").addEventListener("click",()=>void loadQuery());
+$("reto-search-form").addEventListener("submit",e=>{e.preventDefault();void loadQuery();});
+function renderClientResult(box, client) {
+  box.replaceChildren();
+  const strong = document.createElement("strong");
+  strong.textContent = client.nombre || "";
+  box.append(strong, document.createElement("br"));
+  box.append("ID: ", client.clienteId || "", document.createElement("br"));
+  box.append("Ciudad: ", client.ciudad || "", document.createElement("br"));
+  box.append("Correo: ", client.correo || "");
+}
+$("reto-search-form").addEventListener("reset",()=>setTimeout(()=>void loadQuery(),0));
 $("search-form").addEventListener("submit",async e=>{
   e.preventDefault(); const id=$("client-id").value.trim(); const box=$("client-result"); box.hidden=false;box.className="mini-result";box.textContent="Buscando...";
-  try{const data=await getJSON(`/api/clientes/${encodeURIComponent(id)}`);const c=data.cliente;box.className="mini-result success";box.innerHTML=`<strong>${safe(c.nombre)}</strong><br>ID: ${safe(c.clienteId)}<br>Ciudad: ${safe(c.ciudad)}<br>Correo: ${safe(c.correo)}`;}
+  try{const data=await getJSON(`/api/clientes/${encodeURIComponent(id)}`);box.className="mini-result success";renderClientResult(box,data.cliente);}
   catch(err){box.className="mini-result failure";box.textContent=err.message;}
 });
 $("new-client-form").addEventListener("submit",async e=>{
@@ -83,9 +96,9 @@ $("upload-form").addEventListener("submit",async e=>{
     box.className="mini-result success";
     box.textContent=`${data.message} Total insertados: ${data.inserted}; omitidos: ${data.skipped}.${details?` ${details}`:""}`;
     $("upload-form").reset();
-    if(data.inserted)loadQuery();
+    if(data.inserted)void loadQuery();
   }
   catch(err){box.className="mini-result failure";box.textContent=err.message;}
 });
-getJSON("/api/health").then(data=>{$("connection-label").textContent="Panel listo · "+data.region;$("footer-region").textContent="AWS "+data.region;}).catch(()=>{$("connection-label").textContent="Servidor pendiente";});
-loadQuery("ventas");
+void getJSON("/api/health").then(data=>{$("connection-label").textContent="Panel listo · "+data.region;$("footer-region").textContent="AWS "+data.region;}).catch(()=>{$("connection-label").textContent="Servidor pendiente";});
+void loadQuery("ventas");

@@ -20,13 +20,22 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 export AWS_REGION=us-east-1
+export SECRET_KEY="cambia-esta-clave-en-produccion"
 python app.py
+```
+
+La aplicación escucha en `127.0.0.1` por defecto. Para publicarla detrás de un proxy o en una instancia EC2, configura explícitamente la interfaz:
+
+```bash
+export HOST=0.0.0.0
 ```
 
 En Amazon Linux EC2, para una prueba rápida (con los paquetes ya instalados o después de `pip install -r requirements.txt`):
 
 ```bash
 cd dynamo_consultas_web
+export HOST=0.0.0.0
+export SECRET_KEY="cambia-esta-clave-en-produccion"
 sudo python3 -m pip install -r requirements.txt
 sudo python3 app.py
 ```
